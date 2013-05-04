@@ -48,13 +48,10 @@ QWebPage *EpubDocument::convert()
     QString html;
     do {
         if (epub_it_get_curr(it)) {
-            html += QString::fromUtf8(epub_it_get_curr(it));
+            QString temp = QString::fromUtf8(epub_it_get_curr(it));
+            html += enableNetworkDownload(temp);
         }
     } while (epub_it_get_next(it));
-
-    saveToFile("before.html",html);
-    html = enableNetworkDownload(html);
-    saveToFile("after.html",html);
 
     mainFrame()->setHtml(html);
     epub_free_iterator(it);
@@ -82,13 +79,6 @@ QString EpubDocument::enableNetworkDownload(QString html)
             list.at(i).attributes().namedItem("href").setNodeValue("http://"+href);
         }
     }
-
-    //    list = doc.elementsByTagName("html");
-    //    for(int i=0;i<list.count();i++){
-    //        if(list.at(i))
-    //        QString src = list.at(i).attributes().namedItem("src").nodeValue();
-    //        list.at(i).attributes().namedItem("src").setNodeValue("http://"+src);
-    //    }
     return doc.toString();
 }
 

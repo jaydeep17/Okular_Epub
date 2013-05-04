@@ -35,9 +35,12 @@ public:
         : QNetworkReply(object), position(0)
     {
         setRequest(request);
-        qDebug() << "Request type : " << request.header(QNetworkRequest::ContentTypeHeader);
         setOperation(QNetworkAccessManager::GetOperation);
         QString path = request.url().host() + request.url().path();
+        if(path.at(0)==QDir::separator())
+            path = path.right(path.length()-1);
+        if(path.at(path.length()-1)==QDir::separator())
+            path.chop(1);
         filetype = getQVariantFromExt(QFileInfo(path).suffix());
         setHeader(QNetworkRequest::ContentTypeHeader,filetype);
         open(ReadOnly|Unbuffered);
@@ -85,19 +88,10 @@ public:
         char *data;
 
         // Get the data from the epub file
-
-        //QString pattern = request.url().queryItemValue("pattern");
         size = epub_get_data(Epub, path.toUtf8(), &data);
 
         QByteArray saveData(data,size);
         return saveData;
-
-//        QImage image(path);
-//        image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
-//        QByteArray saveData;
-//        QBuffer b(&saveData);
-//        image.save(&b, "PNG");
-//        return saveData;
     }
 
     static QVariant getQVariantFromExt(QString ext)
