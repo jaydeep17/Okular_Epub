@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    epubDoc = new EpubDocument("/media/Local D/epubs/welcome.epub");
+    epubDoc = new EpubDocument("## Path to ur epub goes here ##");
     ui->webView->setPage(epubDoc->convert());
 }
 
