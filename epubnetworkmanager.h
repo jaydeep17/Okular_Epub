@@ -104,6 +104,8 @@ public:
             return QVariant("image/"+ext);
         } else if(ext == "jpg" || ext == "jpeg"){
             return QVariant("image/jpeg");
+        } else if ( ext == "svg") {
+            return QVariant("image/svg+xml");
         }
     }
 

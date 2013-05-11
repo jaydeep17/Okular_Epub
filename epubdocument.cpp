@@ -5,15 +5,19 @@
 #include "epubnetworkmanager.h"
 #include <QDomDocument>
 #include <QDomNodeList>
+#include <QWebView>
 
 #include <QFile>
 
 EpubDocument::EpubDocument(const QString &fileName)
 {
     mEpub = epub_open(qPrintable(fileName), 3);
-    if(isValid()){
-        setNetworkAccessManager(new EpubNetworkManager(mEpub, this));
-    }
+    if(!isValid())
+        return;
+
+    setNetworkAccessManager(new EpubNetworkManager(mEpub, this));
+    view = new QWebView();
+    view->setFixedSize(600,800);
 }
 
 bool EpubDocument::isValid()
@@ -58,6 +62,29 @@ QWebPage *EpubDocument::convert()
     return this;
 }
 
+void EpubDocument::renderPage()
+{
+    QWebPage *page = convert();
+    view->setPage(page);
+    //view->show();
+}
+
+QImage EpubDocument::renderImage(int i)
+{
+    QWebFrame *webFrame = view->page()->mainFrame();
+    webFrame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
+    webFrame->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+
+    int wd = 600, ht = 800, x = 0, y = 0;
+    if(i > 0){
+        y = i * 800;
+    }
+    view->page()->mainFrame()->setScrollPosition(QPoint(x,y));
+
+    QImage img = QPixmap::grabWidget(view,0, 0, wd, ht).toImage();
+    return img;
+}
+
 QString EpubDocument::enableNetworkDownload(QString html)
 {
     QDomDocument doc;
@@ -79,7 +106,13 @@ QString EpubDocument::enableNetworkDownload(QString html)
             list.at(i).attributes().namedItem("href").setNodeValue("http://"+href);
         }
     }
+
+    // svgs
+    list = doc.elementsByTagName("image");
+    for(int i=0;i<list.count();i++){
+        QString src = list.at(i).attributes().namedItem("xlink:href").nodeValue();
+        list.at(i).attributes().namedItem("xlink:href").setNodeValue("http://"+src);
+    }
     return doc.toString();
 }
-
 

@@ -3,6 +3,7 @@
 
 #include <QWebPage>
 #include <epub.h>
+#include <QWebView>
 #include "epubnetworkmanager.h"
 
 class EpubDocument : public QWebPage
@@ -14,14 +15,16 @@ public:
     ~EpubDocument();
     struct epub *getEpub();
     QWebPage *convert();
-    
+    void renderPage();
+    QImage renderImage(int i);
+
 signals:
-    
+
 public slots:
 
 private:
     struct epub *mEpub;
-
+    QWebView *view;
     QString enableNetworkDownload(QString html);
 };
 
