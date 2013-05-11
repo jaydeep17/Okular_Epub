@@ -16,7 +16,7 @@ public:
     struct epub *getEpub();
     QWebPage *convert();
     void renderPage();
-    QImage renderImage(int i);
+    QPixmap renderPixmap(int i);
 
 signals:
 

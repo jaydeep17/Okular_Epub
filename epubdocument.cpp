@@ -69,7 +69,7 @@ void EpubDocument::renderPage()
     //view->show();
 }
 
-QImage EpubDocument::renderImage(int i)
+QPixmap EpubDocument::renderPixmap(int i)
 {
     QWebFrame *webFrame = view->page()->mainFrame();
     webFrame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
@@ -81,8 +81,7 @@ QImage EpubDocument::renderImage(int i)
     }
     view->page()->mainFrame()->setScrollPosition(QPoint(x,y));
 
-    QImage img = QPixmap::grabWidget(view,0, 0, wd, ht).toImage();
-    return img;
+    return QPixmap::grabWidget(view,0, 0, wd, ht);
 }
 
 QString EpubDocument::enableNetworkDownload(QString html)

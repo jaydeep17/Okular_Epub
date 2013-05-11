@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setUpGUI();
     epubDoc = new EpubDocument("## Path to ur epub goes here ##");
+    //epubDoc = new EpubDocument("/media/Local D/epubs/welcome.epub");
     epubDoc->renderPage();
 
     connect(epubDoc,SIGNAL(loadFinished(bool)),SLOT(setPicture()));
@@ -26,7 +27,6 @@ MainWindow::~MainWindow()
 void MainWindow::setUpGUI()
 {
     scroll = new QScrollArea(this);
-    scroll->setContentsMargins(100,100,100,100);
     label = new QLabel(scroll);
     scroll->setWidgetResizable(true);
     scroll->setWidget(label);
@@ -53,8 +53,7 @@ void MainWindow::setUpGUI()
 
 void MainWindow::setPicture()
 {
-    QImage img = epubDoc->renderImage(pageIndex);
-    label->setPixmap(QPixmap::fromImage(img));
+    label->setPixmap(epubDoc->renderPixmap(pageIndex));
 }
 
 void MainWindow::nextPage()
