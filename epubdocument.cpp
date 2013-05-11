@@ -6,7 +6,7 @@
 #include <QDomDocument>
 #include <QDomNodeList>
 #include <QWebView>
-
+#include <QtCore/qmath.h>
 #include <QFile>
 
 EpubDocument::EpubDocument(const QString &fileName)
@@ -66,7 +66,7 @@ void EpubDocument::renderPage()
 {
     QWebPage *page = convert();
     view->setPage(page);
-    //view->show();
+//    view->show();
 }
 
 QPixmap EpubDocument::renderPixmap(int i)
@@ -82,6 +82,11 @@ QPixmap EpubDocument::renderPixmap(int i)
     view->page()->mainFrame()->setScrollPosition(QPoint(x,y));
 
     return QPixmap::grabWidget(view,0, 0, wd, ht);
+}
+
+int EpubDocument::pages()
+{
+    return qCeil(view->page()->mainFrame()->contentsSize().height()/800);
 }
 
 QString EpubDocument::enableNetworkDownload(QString html)

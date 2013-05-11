@@ -36,6 +36,7 @@ private slots:
     void setPicture();
     void nextPage();
     void prevPage();
+    void editReturnPress();
 };
 
 #endif // MAINWINDOW_H

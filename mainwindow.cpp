@@ -11,12 +11,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setUpGUI();
-    epubDoc = new EpubDocument("## Path to ur epub goes here ##");
-    //epubDoc = new EpubDocument("/media/Local D/epubs/welcome.epub");
-    epubDoc->renderPage();
+    QString epubPath = "";
 
+    epubDoc = new EpubDocument(epubPath);
     connect(epubDoc,SIGNAL(loadFinished(bool)),SLOT(setPicture()));
 
+    epubDoc->renderPage();
 }
 
 MainWindow::~MainWindow()
@@ -42,6 +42,7 @@ void MainWindow::setUpGUI()
     edit->setFixedWidth(40);
     edit->setMaxLength(4);
     edit->setText(QString::number(pageIndex));
+    connect(edit,SIGNAL(returnPressed()),SLOT(editReturnPress()));
     ui->statusBar->addPermanentWidget(edit);
 
     next = new QToolButton(ui->statusBar);
@@ -58,6 +59,9 @@ void MainWindow::setPicture()
 
 void MainWindow::nextPage()
 {
+    if(pageIndex >= epubDoc->pages()){
+        return;
+    }
     pageIndex++;
     edit->setText(QString::number(pageIndex));
     setPicture();
@@ -71,5 +75,17 @@ void MainWindow::prevPage()
         edit->setText(QString::number(pageIndex));
         setPicture();
         scroll->ensureVisible(0,0);
+    }
+}
+
+void MainWindow::editReturnPress()
+{
+    bool ok;
+    int indx = edit->text().toInt(&ok);
+    if(ok && indx < epubDoc->pages()){
+        pageIndex = indx;
+        setPicture();
+    } else {
+        edit->setText(QString::number(pageIndex));
     }
 }

@@ -17,6 +17,7 @@ public:
     QWebPage *convert();
     void renderPage();
     QPixmap renderPixmap(int i);
+    int pages();
 
 signals:
 
