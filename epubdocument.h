@@ -18,6 +18,9 @@ public:
     void renderPage();
     QPixmap renderPixmap(int i);
     int pages();
+    void generateTextBounds(int pg);
+    QList<QRect> textBounds();
+    QStringList pageText();
 
 signals:
 
@@ -25,8 +28,11 @@ public slots:
 
 private:
     struct epub *mEpub;
-    QWebView *view;
+    QWebView *mView;
+    QList<QRect> m_textBounds;
+    QStringList m_pageText;
     QString enableNetworkDownload(QString html);
+    bool intersectsWithAny(const QRect &rec);
 };
 
 #endif // EPUBDOCUMENT_H

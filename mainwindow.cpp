@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setUpGUI();
-    QString epubPath = "";
+    QString epubPath = "/media/Local D/epubs/wasteland-20120118.epub";
 
     epubDoc = new EpubDocument(epubPath);
     connect(epubDoc,SIGNAL(loadFinished(bool)),SLOT(setPicture()));
@@ -54,7 +54,17 @@ void MainWindow::setUpGUI()
 
 void MainWindow::setPicture()
 {
-    label->setPixmap(epubDoc->renderPixmap(pageIndex));
+    QPixmap map = epubDoc->renderPixmap(pageIndex);
+    QPainter paint(&map);
+    paint.setPen(Qt::green);
+    QStringList texts = epubDoc->pageText();
+    qDebug() << "pg = " + QString::number(pageIndex) + " " + texts.join(";;");
+    QList<QRect> list = epubDoc->textBounds();
+    foreach (QRect rec, list){
+        paint.drawRect(rec);
+    }
+    paint.end();
+    label->setPixmap(map);
 }
 
 void MainWindow::nextPage()

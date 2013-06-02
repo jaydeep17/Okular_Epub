@@ -106,6 +106,8 @@ public:
             return QVariant("image/jpeg");
         } else if ( ext == "svg") {
             return QVariant("image/svg+xml");
+        } else {
+            return QVariant();
         }
     }
 

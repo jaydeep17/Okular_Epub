@@ -9,6 +9,8 @@
 #include <QtCore/qmath.h>
 #include <QFile>
 
+#include <QWebElement>
+
 EpubDocument::EpubDocument(const QString &fileName)
 {
     mEpub = epub_open(qPrintable(fileName), 3);
@@ -16,8 +18,8 @@ EpubDocument::EpubDocument(const QString &fileName)
         return;
 
     setNetworkAccessManager(new EpubNetworkManager(mEpub, this));
-    view = new QWebView();
-    view->setFixedSize(600,800);
+    mView = new QWebView();
+    mView->setFixedSize(600,800);
 }
 
 bool EpubDocument::isValid()
@@ -65,13 +67,13 @@ QWebPage *EpubDocument::convert()
 void EpubDocument::renderPage()
 {
     QWebPage *page = convert();
-    view->setPage(page);
-//    view->show();
+    mView->setPage(page);
+    mView->show();
 }
 
 QPixmap EpubDocument::renderPixmap(int i)
 {
-    QWebFrame *webFrame = view->page()->mainFrame();
+    QWebFrame *webFrame = mView->page()->mainFrame();
     webFrame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
     webFrame->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
 
@@ -79,14 +81,49 @@ QPixmap EpubDocument::renderPixmap(int i)
     if(i > 0){
         y = i * 800;
     }
-    view->page()->mainFrame()->setScrollPosition(QPoint(x,y));
-
-    return QPixmap::grabWidget(view,0, 0, wd, ht);
+    mView->page()->mainFrame()->setScrollPosition(QPoint(x,y));
+    generateTextBounds(i);
+    return QPixmap::grabWidget(mView,0, 0, wd, ht);
 }
 
 int EpubDocument::pages()
 {
-    return qCeil(view->page()->mainFrame()->contentsSize().height()/800);
+    return qCeil(mView->page()->mainFrame()->contentsSize().height()/800);
+}
+
+void EpubDocument::generateTextBounds(int pg)
+{
+    m_textBounds.clear();
+    m_pageText.clear();
+    QPoint start(1,1);
+    while(start.x() < mView->width() && start.y() < mView->height()){
+        QWebHitTestResult hit = mView->page()->mainFrame()->hitTestContent(start);
+        if(!hit.isNull()){
+            QRect r = hit.boundingRect();
+            r.setTop(r.top() - (pg*mView->height()));
+            r.setBottom(r.bottom() - (pg*mView->height()));
+            if(!intersectsWithAny(r)){
+                m_textBounds.append(r);
+                m_pageText.append(hit.element().toPlainText());
+            }
+        }
+        start.setX( start.x() + 10 );
+        if(start.x() >= mView->width()){
+            start.setX( 1 );
+            start.setY( start.y() + 10 );
+        }
+
+    }
+}
+
+QList<QRect> EpubDocument::textBounds()
+{
+    return m_textBounds;
+}
+
+QStringList EpubDocument::pageText()
+{
+    return m_pageText;
 }
 
 QString EpubDocument::enableNetworkDownload(QString html)
@@ -118,5 +155,15 @@ QString EpubDocument::enableNetworkDownload(QString html)
         list.at(i).attributes().namedItem("xlink:href").setNodeValue("http://"+src);
     }
     return doc.toString();
+}
+
+bool EpubDocument::intersectsWithAny(const QRect &rec)
+{
+    foreach(QRect rr, m_textBounds){
+        if(rec.intersects(rr)){
+            return true;
+        }
+    }
+    return false;
 }
 
